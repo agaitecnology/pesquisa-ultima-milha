@@ -1,0 +1,1302 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pesquisa — O Pequeno Operador de Última Milha</title>
+  <style>
+    :root {
+      --bg: #0f1117;
+      --surface: #1a1d27;
+      --surface2: #22263a;
+      --border: #2e3350;
+      --accent: #f5a623;
+      --accent2: #4fc3f7;
+      --text: #e8eaf0;
+      --text-muted: #8a8faa;
+      --success: #4caf7d;
+      --error: #e05a5a;
+      --radius: 12px;
+      --radius-sm: 8px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 0 0 60px;
+    }
+
+    /* Header */
+    .header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 24px 16px 18px;
+      text-align: center;
+    }
+    .header-logo {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+    .header-logo svg {
+      display: block;
+    }
+    .header h1 {
+      font-size: 18px;
+      font-weight: 700;
+      line-height: 1.3;
+      color: var(--text);
+    }
+
+    /* Progress bar */
+    .progress-wrap {
+      background: var(--surface);
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    .progress-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+    .progress-bar {
+      height: 4px;
+      background: var(--border);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      background: var(--accent);
+      border-radius: 2px;
+      transition: width 0.4s ease;
+    }
+
+    /* Main container */
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 0 16px;
+    }
+
+    /* Intro screen */
+    .intro {
+      padding: 32px 0 24px;
+    }
+    .intro-badge {
+      display: inline-block;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 4px 14px;
+      font-size: 12px;
+      color: var(--accent);
+      font-weight: 600;
+      margin-bottom: 20px;
+      letter-spacing: 0.5px;
+    }
+    .intro h2 {
+      font-size: 24px;
+      font-weight: 800;
+      line-height: 1.3;
+      margin-bottom: 16px;
+      color: var(--text);
+    }
+    .intro p {
+      font-size: 16px;
+      line-height: 1.6;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+    }
+    .intro-info {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--accent2);
+      border-radius: var(--radius-sm);
+      padding: 14px 16px;
+      font-size: 14px;
+      color: var(--text-muted);
+      line-height: 1.5;
+      margin-bottom: 28px;
+    }
+    .intro-info strong {
+      color: var(--text);
+    }
+
+    /* Section headers */
+    .section-header {
+      padding: 28px 0 8px;
+    }
+    .section-label {
+      font-size: 11px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--accent);
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+    .section-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    /* Question block */
+    .question {
+      padding: 20px 0 4px;
+    }
+    .question-number {
+      font-size: 11px;
+      color: var(--text-muted);
+      font-weight: 600;
+      letter-spacing: 1px;
+      margin-bottom: 6px;
+    }
+    .question-text {
+      font-size: 16px;
+      font-weight: 600;
+      line-height: 1.4;
+      color: var(--text);
+      margin-bottom: 14px;
+    }
+    .question-hint {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-top: -10px;
+      margin-bottom: 14px;
+      font-style: italic;
+    }
+
+    /* Options */
+    .options {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .option {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 14px 16px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .option:hover {
+      border-color: var(--accent2);
+      background: var(--surface2);
+    }
+    .option.selected {
+      border-color: var(--accent);
+      background: var(--surface2);
+    }
+    .option-marker {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      border: 2px solid var(--border);
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s ease;
+    }
+    .option.selected .option-marker {
+      border-color: var(--accent);
+      background: var(--accent);
+    }
+    .option.selected .option-marker::after {
+      content: '';
+      width: 8px;
+      height: 8px;
+      background: var(--bg);
+      border-radius: 50%;
+    }
+    .option-marker.checkbox {
+      border-radius: 4px;
+    }
+    .option.selected .option-marker.checkbox::after {
+      content: '✓';
+      font-size: 12px;
+      color: var(--bg);
+      font-weight: 800;
+    }
+    .option-text {
+      font-size: 15px;
+      color: var(--text);
+      line-height: 1.3;
+    }
+
+    /* Textarea */
+    .textarea-wrap {
+      position: relative;
+    }
+    textarea {
+      width: 100%;
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 14px 16px;
+      font-size: 15px;
+      color: var(--text);
+      font-family: inherit;
+      resize: none;
+      min-height: 100px;
+      transition: border-color 0.15s;
+      -webkit-appearance: none;
+    }
+    textarea:focus {
+      outline: none;
+      border-color: var(--accent2);
+    }
+    textarea::placeholder { color: var(--text-muted); }
+
+    /* Text input (email) */
+    .text-input {
+      width: 100%;
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 14px 16px;
+      font-size: 15px;
+      color: var(--text);
+      font-family: inherit;
+      transition: border-color 0.15s;
+      -webkit-appearance: none;
+    }
+    .text-input:focus {
+      outline: none;
+      border-color: var(--accent2);
+    }
+    .text-input::placeholder { color: var(--text-muted); }
+
+    /* Divider */
+    .divider {
+      height: 1px;
+      background: var(--border);
+      margin: 24px 0 0;
+    }
+
+    /* Buttons */
+    .btn-primary {
+      display: block;
+      width: 100%;
+      background: var(--accent);
+      color: #0f1117;
+      border: none;
+      border-radius: var(--radius);
+      padding: 16px;
+      font-size: 16px;
+      font-weight: 800;
+      font-family: inherit;
+      cursor: pointer;
+      transition: opacity 0.15s, transform 0.1s;
+      letter-spacing: 0.3px;
+    }
+    .btn-primary:active { transform: scale(0.98); }
+    .btn-primary:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+    .btn-actions {
+      padding: 28px 0 0;
+      display: flex;
+      gap: 12px;
+    }
+    .btn-back {
+      background: var(--surface);
+      color: var(--text-muted);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px 20px;
+      font-size: 15px;
+      font-family: inherit;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: all 0.15s;
+    }
+    .btn-back:hover {
+      border-color: var(--text-muted);
+      color: var(--text);
+    }
+    .btn-next {
+      flex: 1;
+      background: var(--accent);
+      color: #0f1117;
+      border: none;
+      border-radius: var(--radius);
+      padding: 14px 20px;
+      font-size: 16px;
+      font-weight: 800;
+      font-family: inherit;
+      cursor: pointer;
+      transition: opacity 0.15s, transform 0.1s;
+    }
+    .btn-next:active { transform: scale(0.98); }
+    .btn-next:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    /* Required indicator */
+    .required-note {
+      font-size: 12px;
+      color: var(--text-muted);
+      padding: 8px 0 0;
+    }
+
+    /* Screens */
+    .screen { display: none; }
+    .screen.active { display: block; }
+
+    /* Thank you screen */
+    .thankyou {
+      padding: 48px 0 32px;
+      text-align: center;
+    }
+    .thankyou-icon {
+      font-size: 64px;
+      margin-bottom: 20px;
+    }
+    .thankyou h2 {
+      font-size: 26px;
+      font-weight: 800;
+      margin-bottom: 16px;
+    }
+    .thankyou p {
+      font-size: 16px;
+      color: var(--text-muted);
+      line-height: 1.6;
+      margin-bottom: 16px;
+    }
+    .thankyou-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--success);
+      border-radius: var(--radius-sm);
+      padding: 16px;
+      text-align: left;
+      margin-top: 24px;
+      font-size: 14px;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    /* Email screen extras */
+    .email-section {
+      padding: 28px 0 0;
+    }
+    .email-label {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+    .email-hint {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 14px;
+      line-height: 1.4;
+    }
+
+    /* Conditional hidden */
+    .conditional { display: none; }
+    .conditional.visible { display: block; }
+
+    /* Error */
+    .field-error {
+      font-size: 13px;
+      color: var(--error);
+      padding: 6px 0 0;
+      display: none;
+    }
+    .field-error.visible { display: block; }
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-logo">
+    <!-- AgAiTec wordmark SVG — estilo serifado dourado fiel ao logo final -->
+    <svg width="220" height="48" viewBox="0 0 220 48" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="AgAiTec">
+      <defs>
+        <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="#f5d07a"/>
+          <stop offset="50%" stop-color="#f5a623"/>
+          <stop offset="100%" stop-color="#c97b1a"/>
+        </linearGradient>
+      </defs>
+      <!-- Ag -->
+      <text x="0" y="34" font-family="Georgia,'Times New Roman',serif" font-size="34" font-weight="700" fill="url(#gold)" letter-spacing="-1">Ag</text>
+      <!-- Ai em dourado mais brilhante -->
+      <text x="48" y="34" font-family="Georgia,'Times New Roman',serif" font-size="34" font-weight="700" fill="#f5d07a" letter-spacing="-1">Ai</text>
+      <!-- Tec em tom mais suave -->
+      <text x="93" y="34" font-family="Georgia,'Times New Roman',serif" font-size="34" font-weight="400" fill="#c97b1a" letter-spacing="-0.5">Tec</text>
+      <!-- Linha decorativa + tagline -->
+      <line x1="0" y1="40" x2="80" y2="40" stroke="#f5a623" stroke-width="0.5" opacity="0.5"/>
+      <text x="0" y="47" font-family="'Segoe UI',system-ui,sans-serif" font-size="7" font-weight="400" fill="#8a8faa" letter-spacing="3">UM PONTO NA EVOLUÇÃO</text>
+    </svg>
+  </div>
+  <h1>O Pequeno Operador de Última Milha no Brasil</h1>
+</div>
+
+<!-- PROGRESS -->
+<div class="progress-wrap" id="progressWrap" style="display:none">
+  <div class="progress-label">
+    <span id="progressText">Parte 1 de 6</span>
+    <span id="progressPct">0%</span>
+  </div>
+  <div class="progress-bar">
+    <div class="progress-fill" id="progressFill" style="width:0%"></div>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- ═══════════════════════════════════════ -->
+  <!-- SCREEN 0 — INTRO                        -->
+  <!-- ═══════════════════════════════════════ -->
+  <div class="screen active" id="screen-intro">
+    <div class="intro">
+      <div class="intro-badge">Pesquisa Nacional · 2026</div>
+      <h2>Você trabalha com entregas?<br>Queremos ouvir você.</h2>
+      <p>Queremos entender como é, de verdade, cuidar do dinheiro e tomar decisões no dia a dia.</p>
+      <p>Não é fiscalização. Não é venda. <strong>Não existe resposta certa.</strong></p>
+      <div class="intro-info">
+        <strong>🔒 Suas respostas são anônimas.</strong><br>
+        Nenhuma pessoa ou organização — incluindo a Associação — terá acesso às suas respostas individuais. Somente os resultados consolidados serão compartilhados.<br><br>
+        <strong>⏱ Leva cerca de 5 minutos.</strong>
+      </div>
+      <button class="btn-primary" onclick="startSurvey()">Começar pesquisa →</button>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════ -->
+  <!-- SCREEN 1 — PARTE 1: Sobre o trabalho   -->
+  <!-- ═══════════════════════════════════════ -->
+  <div class="screen" id="screen-1">
+    <div class="section-header">
+      <div class="section-label">Parte 1 de 6</div>
+      <div class="section-title">Sobre o seu trabalho</div>
+    </div>
+
+    <!-- Q1 -->
+    <div class="question">
+      <div class="question-number">Pergunta 1</div>
+      <div class="question-text">Em que região do Brasil você trabalha?</div>
+      <div class="options" id="q1">
+        <div class="option" onclick="selectOption('q1',this,'Norte')">
+          <div class="option-marker"></div><span class="option-text">Norte</span>
+        </div>
+        <div class="option" onclick="selectOption('q1',this,'Nordeste')">
+          <div class="option-marker"></div><span class="option-text">Nordeste</span>
+        </div>
+        <div class="option" onclick="selectOption('q1',this,'Centro-Oeste')">
+          <div class="option-marker"></div><span class="option-text">Centro-Oeste</span>
+        </div>
+        <div class="option" onclick="selectOption('q1',this,'Sudeste')">
+          <div class="option-marker"></div><span class="option-text">Sudeste</span>
+        </div>
+        <div class="option" onclick="selectOption('q1',this,'Sul')">
+          <div class="option-marker"></div><span class="option-text">Sul</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Q2 -->
+    <div class="question">
+      <div class="question-number">Pergunta 2</div>
+      <div class="question-text">Sua cidade é...</div>
+      <div class="options" id="q2">
+        <div class="option" onclick="selectOption('q2',this,'Capital ou região metropolitana')">
+          <div class="option-marker"></div><span class="option-text">Capital ou região metropolitana</span>
+        </div>
+        <div class="option" onclick="selectOption('q2',this,'Cidade grande (mas não capital)')">
+          <div class="option-marker"></div><span class="option-text">Cidade grande (mas não capital)</span>
+        </div>
+        <div class="option" onclick="selectOption('q2',this,'Cidade média')">
+          <div class="option-marker"></div><span class="option-text">Cidade média</span>
+        </div>
+        <div class="option" onclick="selectOption('q2',this,'Cidade pequena / interior')">
+          <div class="option-marker"></div><span class="option-text">Cidade pequena / interior</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Q3 -->
+    <div class="question">
+      <div class="question-number">Pergunta 3</div>
+      <div class="question-text">Como você trabalha hoje?</div>
+      <div class="options" id="q3">
+        <div class="option" onclick="selectOption('q3',this,'Sozinho, com a minha própria moto ou van')">
+          <div class="option-marker"></div><span class="option-text">Sozinho, com a minha própria moto ou van</span>
+        </div>
+        <div class="option" onclick="selectOption('q3',this,'Sozinho, mas com mais de um veículo')">
+          <div class="option-marker"></div><span class="option-text">Sozinho, mas com mais de um veículo</span>
+        </div>
+        <div class="option" onclick="selectOption('q3',this,'Tenho gente trabalhando comigo')">
+          <div class="option-marker"></div><span class="option-text">Tenho gente trabalhando comigo</span>
+        </div>
+        <div class="option" onclick="selectOption('q3',this,'Outro')">
+          <div class="option-marker"></div><span class="option-text">Outro</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Q4 — CONDICIONAL -->
+    <div class="question conditional" id="q4-block">
+      <div class="question-number">Pergunta 4</div>
+      <div class="question-text">Quantas pessoas ou veículos ao todo, contando você?</div>
+      <div class="options" id="q4">
+        <div class="option" onclick="selectOption('q4',this,'2 a 3')">
+          <div class="option-marker"></div><span class="option-text">2 a 3</span>
+        </div>
+        <div class="option" onclick="selectOption('q4',this,'4 a 6')">
+          <div class="option-marker"></div><span class="option-text">4 a 6</span>
+        </div>
+        <div class="option" onclick="selectOption('q4',this,'Mais de 6')">
+          <div class="option-marker"></div><span class="option-text">Mais de 6</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Q5 -->
+    <div class="question">
+      <div class="question-number">Pergunta 5</div>
+      <div class="question-text">Há quanto tempo você trabalha com entregas?</div>
+      <div class="options" id="q5">
+        <div class="option" onclick="selectOption('q5',this,'Menos de 6 meses')">
+          <div class="option-marker"></div><span class="option-text">Menos de 6 meses</span>
+        </div>
+        <div class="option" onclick="selectOption('q5',this,'6 meses a 2 anos')">
+          <div class="option-marker"></div><span class="option-text">6 meses a 2 anos</span>
+        </div>
+        <div class="option" onclick="selectOption('q5',this,'2 a 5 anos')">
+          <div class="option-marker"></div><span class="option-text">2 a 5 anos</span>
+        </div>
+        <div class="option" onclick="selectOption('q5',this,'Mais de 5 anos')">
+          <div class="option-marker"></div><span class="option-text">Mais de 5 anos</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Q6 -->
+    <div class="question">
+      <div class="question-number">Pergunta 6</div>
+      <div class="question-text">Quem mais te contrata hoje, na maior parte do tempo?</div>
+      <div class="options" id="q6">
+        <div class="option" onclick="selectOption('q6',this,'Apps de entrega (iFood, Rappi, etc.)')">
+          <div class="option-marker"></div><span class="option-text">Apps de entrega (iFood, Rappi, etc.)</span>
+        </div>
+        <div class="option" onclick="selectOption('q6',this,'Empresas ou comércios locais direto')">
+          <div class="option-marker"></div><span class="option-text">Empresas ou comércios locais direto</span>
+        </div>
+        <div class="option" onclick="selectOption('q6',this,'Pequenas transportadoras')">
+          <div class="option-marker"></div><span class="option-text">Pequenas transportadoras</span>
+        </div>
+        <div class="option" onclick="selectOption('q6',this,'Uma mistura de vários')">
+          <div class="option-marker"></div><span class="option-text">Uma mistura de vários</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Q7 -->
+    <div class="question">
+      <div class="question-number">Pergunta 7</div>
+      <div class="question-text">Sua renda muda muito de mês para mês?</div>
+      <div class="options" id="q7">
+        <div class="option" onclick="selectOption('q7',this,'Sim, varia bastante')">
+          <div class="option-marker"></div><span class="option-text">Sim, varia bastante</span>
+        </div>
+        <div class="option" onclick="selectOption('q7',this,'Varia um pouco, mas é razoável prever')">
+          <div class="option-marker"></div><span class="option-text">Varia um pouco, mas é razoável prever</span>
+        </div>
+        <div class="option" onclick="selectOption('q7',this,'É bem constante')">
+          <div class="option-marker"></div><span class="option-text">É bem constante</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Q8 -->
+    <div class="question">
+      <div class="question-number">Pergunta 8</div>
+      <div class="question-text">Hoje você usa algum app, planilha ou caderno para controlar seus ganhos e gastos?</div>
+      <div class="options" id="q8">
+        <div class="option" onclick="selectOption('q8',this,'Sim, uso um app de finanças')">
+          <div class="option-marker"></div><span class="option-text">Sim, uso um app de finanças</span>
+        </div>
+        <div class="option" onclick="selectOption('q8',this,'Sim, uso planilha (Excel, Sheets, etc.)')">
+          <div class="option-marker"></div><span class="option-text">Sim, uso planilha (Excel, Sheets, etc.)</span>
+        </div>
+        <div class="option" onclick="selectOption('q8',this,'Sim, uso caderno ou anotações no celular')">
+          <div class="option-marker"></div><span class="option-text">Sim, uso caderno ou anotações no celular</span>
+        </div>
+        <div class="option" onclick="selectOption('q8',this,'Não uso nada, guardo na cabeça')">
+          <div class="option-marker"></div><span class="option-text">Não uso nada, guardo na cabeça</span>
+        </div>
+        <div class="option" onclick="selectOption('q8',this,'Outro')">
+          <div class="option-marker"></div><span class="option-text">Outro</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+    <div class="btn-actions">
+      <button class="btn-back" onclick="goBack(1)">← Voltar</button>
+      <button class="btn-next" id="btn-1" onclick="goNext(1,2)" disabled>Continuar →</button>
+    </div>
+    <div class="required-note">* Todas as perguntas desta seção são obrigatórias, exceto a Q4 (condicional)</div>
+  </div>
+
+  <!-- ═══════════════════════════════════════ -->
+  <!-- SCREEN 2 — PARTE 2: Dinheiro do dia a dia -->
+  <!-- ═══════════════════════════════════════ -->
+  <div class="screen" id="screen-2">
+    <div class="section-header">
+      <div class="section-label">Parte 2 de 6</div>
+      <div class="section-title">Dinheiro do dia a dia</div>
+    </div>
+
+    <!-- Q9 -->
+    <div class="question">
+      <div class="question-number">Pergunta 9</div>
+      <div class="question-text">Quando você recebe o pagamento de uma entrega, cai direto na sua conta pessoal ou você tem uma conta separada para o trabalho?</div>
+      <div class="options" id="q9">
+        <div class="option" onclick="selectOption('q9',this,'Cai tudo na minha conta pessoal')">
+          <div class="option-marker"></div><span class="option-text">Cai tudo na minha conta pessoal</span>
+        </div>
+        <div class="option" onclick="selectOption('q9',this,'Tenho conta separada para o trabalho')">
+          <div class="option-marker"></div><span class="option-text">Tenho conta separada para o trabalho</span>
+        </div>
+        <div class="option" onclick="selectOption('q9',this,'Depende do cliente ou app')">
+          <div class="option-marker"></div><span class="option-text">Depende do cliente ou app</span>
+        </div>
+        <div class="option" onclick="selectOption('q9',this,'Uso carteira digital diferente para cada coisa')">
+          <div class="option-marker"></div><span class="option-text">Uso carteira digital diferente para cada coisa</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Q10 -->
+    <div class="question">
+      <div class="question-number">Pergunta 10</div>
+      <div class="question-text">No dia a dia, quando precisa pagar algo do trabalho — gasolina, manutenção — e o dinheiro está todo junto, o que costuma fazer?</div>
+      <div class="options" id="q10">
+        <div class="option" onclick="selectOption('q10',this,'Pago e depois separo mentalmente o que foi do trabalho')">
+          <div class="option-marker"></div><span class="option-text">Pago e depois separo mentalmente o que foi do trabalho</span>
+        </div>
+        <div class="option" onclick="selectOption('q10',this,'Pago sem separar, fica tudo junto mesmo')">
+          <div class="option-marker"></div><span class="option-text">Pago sem separar, fica tudo junto mesmo</span>
+        </div>
+        <div class="option" onclick="selectOption('q10',this,'Tenho conta separada, então pago direto dela')">
+          <div class="option-marker"></div><span class="option-text">Tenho conta separada, então pago direto dela</span>
+        </div>
+        <div class="option" onclick="selectOption('q10',this,'Depende da situação')">
+          <div class="option-marker"></div><span class="option-text">Depende da situação</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Q11 -->
+    <div class="question">
+      <div class="question-number">Pergunta 11</div>
+      <div class="question-text">Quando precisa de dinheiro para algo pessoal — mercado, aluguel — e o único disponível é o do trabalho, o que costuma fazer?</div>
+      <div class="options" id="q11">
+        <div class="option" onclick="selectOption('q11',this,'Uso e depois \"devo\" pro trabalho mentalmente')">
+          <div class="option-marker"></div><span class="option-text">Uso e depois "devo" pro trabalho mentalmente</span>
+        </div>
+        <div class="option" onclick="selectOption('q11',this,'Uso sem pensar nisso')">
+          <div class="option-marker"></div><span class="option-text">Uso sem pensar nisso</span>
+        </div>
+        <div class="option" onclick="selectOption('q11',this,'Tenho conta separada, então não misturo')">
+          <div class="option-marker"></div><span class="option-text">Tenho conta separada, então não misturo</span>
+        </div>
+        <div class="option" onclick="selectOption('q11',this,'Depende da situação')">
+          <div class="option-marker"></div><span class="option-text">Depende da situação</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+    <div class="btn-actions">
+      <button class="btn-back" onclick="goBack(2)">← Voltar</button>
+      <button class="btn-next" id="btn-2" onclick="goNext(2,3)" disabled>Continuar →</button>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════ -->
+  <!-- SCREEN 3 — PARTE 3: Quanto sobra        -->
+  <!-- ═══════════════════════════════════════ -->
+  <div class="screen" id="screen-3">
+    <div class="section-header">
+      <div class="section-label">Parte 3 de 6</div>
+      <div class="section-title">Quanto sobra de verdade</div>
+    </div>
+
+    <!-- Q12 — resposta livre -->
+    <div class="question">
+      <div class="question-number">Pergunta 12</div>
+      <div class="question-text">No fim do dia ou da semana, como você sabe se valeu a pena trabalhar?</div>
+      <div class="question-hint">Resposta curta — não precisa ser longa</div>
+      <div class="textarea-wrap">
+        <textarea id="q12" placeholder="Escreva o que vier..." rows="3" oninput="checkSection(3)"></textarea>
+      </div>
+    </div>
+
+    <!-- Q13 -->
+    <div class="question">
+      <div class="question-number">Pergunta 13</div>
+      <div class="question-text">Quando você calcula quanto ganhou, o que costuma fazer?</div>
+      <div class="options" id="q13">
+        <div class="option" onclick="selectOption('q13',this,'Desconto todos os gastos antes de saber quanto sobrou')">
+          <div class="option-marker"></div><span class="option-text">Desconto todos os gastos antes de saber quanto sobrou</span>
+        </div>
+        <div class="option" onclick="selectOption('q13',this,'Olho principalmente o que entrou')">
+          <div class="option-marker"></div><span class="option-text">Olho principalmente o que entrou</span>
+        </div>
+        <div class="option" onclick="selectOption('q13',this,'Não calculo — sei pela sensação se está apertado ou folgado')">
+          <div class="option-marker"></div><span class="option-text">Não calculo — sei pela sensação se está apertado ou folgado</span>
+        </div>
+        <div class="option" onclick="selectOption('q13',this,'Não calculo — não consigo saber')">
+          <div class="option-marker"></div><span class="option-text">Não calculo — não consigo saber</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Q14 -->
+    <div class="question">
+      <div class="question-number">Pergunta 14</div>
+      <div class="question-text">Quando pensa se o trabalho está valendo a pena, você leva em conta o custo de manutenção e reposição da moto (pneu, óleo, revisão, peças)?</div>
+      <div class="options" id="q14">
+        <div class="option" onclick="selectOption('q14',this,'Sim, sempre penso nisso')">
+          <div class="option-marker"></div><span class="option-text">Sim, sempre penso nisso</span>
+        </div>
+        <div class="option" onclick="selectOption('q14',this,'Às vezes penso')">
+          <div class="option-marker"></div><span class="option-text">Às vezes penso</span>
+        </div>
+        <div class="option" onclick="selectOption('q14',this,'Não costumo pensar nisso no dia a dia')">
+          <div class="option-marker"></div><span class="option-text">Não costumo pensar nisso no dia a dia</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Q15 -->
+    <div class="question">
+      <div class="question-number">Pergunta 15</div>
+      <div class="question-text">Você sabe, com certeza, quanto já faturou este ano?</div>
+      <div class="options" id="q15">
+        <div class="option" onclick="selectOption('q15',this,'Sim, sei o valor certo')">
+          <div class="option-marker"></div><span class="option-text">Sim, sei o valor certo</span>
+        </div>
+        <div class="option" onclick="selectOption('q15',this,'Tenho uma ideia aproximada')">
+          <div class="option-marker"></div><span class="option-text">Tenho uma ideia aproximada</span>
+        </div>
+        <div class="option" onclick="selectOption('q15',this,'Não faço ideia')">
+          <div class="option-marker"></div><span class="option-text">Não faço ideia</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Q16 -->
+    <div class="question">
+      <div class="question-number">Pergunta 16</div>
+      <div class="question-text">Você já teve algum aperto por causa de documento vencido, imposto atrasado ou obrigação parecida?</div>
+      <div class="options" id="q16">
+        <div class="option" onclick="selectOption('q16',this,'Sim, já aconteceu')">
+          <div class="option-marker"></div><span class="option-text">Sim, já aconteceu</span>
+        </div>
+        <div class="option" onclick="selectOption('q16',this,'Nunca aconteceu — estou em dia com as obrigações')">
+          <div class="option-marker"></div><span class="option-text">Nunca aconteceu — estou em dia com as obrigações</span>
+        </div>
+        <div class="option" onclick="selectOption('q16',this,'Nunca aconteceu, mas me preocupa')">
+          <div class="option-marker"></div><span class="option-text">Nunca aconteceu, mas me preocupa</span>
+        </div>
+        <div class="option" onclick="selectOption('q16',this,'Não me preocupo com isso')">
+          <div class="option-marker"></div><span class="option-text">Não me preocupo com isso</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+    <div class="btn-actions">
+      <button class="btn-back" onclick="goBack(3)">← Voltar</button>
+      <button class="btn-next" id="btn-3" onclick="goNext(3,4)" disabled>Continuar →</button>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════ -->
+  <!-- SCREEN 4 — PARTE 4: Como você decide   -->
+  <!-- ═══════════════════════════════════════ -->
+  <div class="screen" id="screen-4">
+    <div class="section-header">
+      <div class="section-label">Parte 4 de 6</div>
+      <div class="section-title">Como você decide</div>
+    </div>
+
+    <!-- Q17 — resposta livre -->
+    <div class="question">
+      <div class="question-number">Pergunta 17</div>
+      <div class="question-text">Quando um app ou cliente oferece uma corrida ou entrega, o que faz você aceitar ou recusar?</div>
+      <div class="question-hint">Resposta curta — não precisa ser longa</div>
+      <textarea id="q17" placeholder="Escreva o que vier..." rows="3" oninput="checkSection(4)"></textarea>
+    </div>
+
+    <!-- Q18 -->
+    <div class="question">
+      <div class="question-number">Pergunta 18</div>
+      <div class="question-text">Você tem, mesmo que de cabeça, um valor mínimo abaixo do qual não vale a pena pegar?</div>
+      <div class="options" id="q18">
+        <div class="option" onclick="selectOption('q18',this,'Sim, tenho um número em mente')">
+          <div class="option-marker"></div><span class="option-text">Sim, tenho um número em mente</span>
+        </div>
+        <div class="option" onclick="selectOption('q18',this,'Mais ou menos, depende do dia')">
+          <div class="option-marker"></div><span class="option-text">Mais ou menos, depende do dia</span>
+        </div>
+        <div class="option" onclick="selectOption('q18',this,'Não, pego o que aparece')">
+          <div class="option-marker"></div><span class="option-text">Não, pego o que aparece</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Q19 -->
+    <div class="question">
+      <div class="question-number">Pergunta 19</div>
+      <div class="question-text">Se um mês vier ruim, o que você costuma fazer primeiro?</div>
+      <div class="options" id="q19">
+        <div class="option" onclick="selectOption('q19',this,'Trabalho mais horas')">
+          <div class="option-marker"></div><span class="option-text">Trabalho mais horas</span>
+        </div>
+        <div class="option" onclick="selectOption('q19',this,'Corto gasto pessoal')">
+          <div class="option-marker"></div><span class="option-text">Corto gasto pessoal</span>
+        </div>
+        <div class="option" onclick="selectOption('q19',this,'Busco outra fonte de renda')">
+          <div class="option-marker"></div><span class="option-text">Busco outra fonte de renda</span>
+        </div>
+        <div class="option" onclick="selectOption('q19',this,'Continuo igual e espero melhorar')">
+          <div class="option-marker"></div><span class="option-text">Continuo igual e espero melhorar</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Q20 -->
+    <div class="question">
+      <div class="question-number">Pergunta 20</div>
+      <div class="question-text">Você planeja o trabalho pensando em daqui a alguns meses, ou vive mais o dia a dia?</div>
+      <div class="options" id="q20">
+        <div class="option" onclick="selectOption('q20',this,'Penso mais no futuro (meses ou ano)')">
+          <div class="option-marker"></div><span class="option-text">Penso mais no futuro (meses ou ano)</span>
+        </div>
+        <div class="option" onclick="selectOption('q20',this,'Penso na semana')">
+          <div class="option-marker"></div><span class="option-text">Penso na semana</span>
+        </div>
+        <div class="option" onclick="selectOption('q20',this,'Vivo o dia a dia')">
+          <div class="option-marker"></div><span class="option-text">Vivo o dia a dia</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Q21 -->
+    <div class="question">
+      <div class="question-number">Pergunta 21</div>
+      <div class="question-text">Quando precisa tomar uma decisão importante sobre o trabalho, onde você busca informação?</div>
+      <div class="options" id="q21">
+        <div class="option" onclick="selectOption('q21',this,'Resolvo sozinho, com base na minha experiência')">
+          <div class="option-marker"></div><span class="option-text">Resolvo sozinho, com base na minha experiência</span>
+        </div>
+        <div class="option" onclick="selectOption('q21',this,'Converso com outros entregadores')">
+          <div class="option-marker"></div><span class="option-text">Converso com outros entregadores</span>
+        </div>
+        <div class="option" onclick="selectOption('q21',this,'Converso com alguém da família')">
+          <div class="option-marker"></div><span class="option-text">Converso com alguém da família</span>
+        </div>
+        <div class="option" onclick="selectOption('q21',this,'Busco informação na internet')">
+          <div class="option-marker"></div><span class="option-text">Busco informação na internet</span>
+        </div>
+        <div class="option" onclick="selectOption('q21',this,'Outro')">
+          <div class="option-marker"></div><span class="option-text">Outro</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+    <div class="btn-actions">
+      <button class="btn-back" onclick="goBack(4)">← Voltar</button>
+      <button class="btn-next" id="btn-4" onclick="goNext(4,5)" disabled>Continuar →</button>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════ -->
+  <!-- SCREEN 5 — PARTE 5: Objetivos          -->
+  <!-- ═══════════════════════════════════════ -->
+  <div class="screen" id="screen-5">
+    <div class="section-header">
+      <div class="section-label">Parte 5 de 6</div>
+      <div class="section-title">Objetivos e trajetória</div>
+    </div>
+
+    <!-- Q22 -->
+    <div class="question">
+      <div class="question-number">Pergunta 22</div>
+      <div class="question-text">O que te levou a trabalhar com entregas?</div>
+      <div class="options" id="q22">
+        <div class="option" onclick="selectOption('q22',this,'Renda')">
+          <div class="option-marker"></div><span class="option-text">Renda</span>
+        </div>
+        <div class="option" onclick="selectOption('q22',this,'Falta de emprego formal')">
+          <div class="option-marker"></div><span class="option-text">Falta de emprego formal</span>
+        </div>
+        <div class="option" onclick="selectOption('q22',this,'Liberdade')">
+          <div class="option-marker"></div><span class="option-text">Liberdade</span>
+        </div>
+        <div class="option" onclick="selectOption('q22',this,'Complemento de renda')">
+          <div class="option-marker"></div><span class="option-text">Complemento de renda</span>
+        </div>
+        <div class="option" onclick="selectOption('q22',this,'Transição profissional')">
+          <div class="option-marker"></div><span class="option-text">Transição profissional</span>
+        </div>
+        <div class="option" onclick="selectOption('q22',this,'Outro')">
+          <div class="option-marker"></div><span class="option-text">Outro</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Q23 -->
+    <div class="question">
+      <div class="question-number">Pergunta 23</div>
+      <div class="question-text">Hoje, no geral, você está satisfeito com esse trabalho?</div>
+      <div class="options" id="q23">
+        <div class="option" onclick="selectOption('q23',this,'Satisfeito')">
+          <div class="option-marker"></div><span class="option-text">Satisfeito</span>
+        </div>
+        <div class="option" onclick="selectOption('q23',this,'Neutro')">
+          <div class="option-marker"></div><span class="option-text">Neutro</span>
+        </div>
+        <div class="option" onclick="selectOption('q23',this,'Insatisfeito')">
+          <div class="option-marker"></div><span class="option-text">Insatisfeito</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Q24 — múltipla escolha -->
+    <div class="question">
+      <div class="question-number">Pergunta 24</div>
+      <div class="question-text">O que seria "dar certo" nesse trabalho, pra você?</div>
+      <div class="question-hint">Pode marcar mais de uma</div>
+      <div class="options" id="q24">
+        <div class="option multi" onclick="selectMulti('q24',this,'Ganhar mais')">
+          <div class="option-marker checkbox"></div><span class="option-text">Ganhar mais</span>
+        </div>
+        <div class="option multi" onclick="selectMulti('q24',this,'Trabalhar menos horas')">
+          <div class="option-marker checkbox"></div><span class="option-text">Trabalhar menos horas</span>
+        </div>
+        <div class="option multi" onclick="selectMulti('q24',this,'Ter veículo próprio, sem financiamento')">
+          <div class="option-marker checkbox"></div><span class="option-text">Ter veículo próprio, sem financiamento</span>
+        </div>
+        <div class="option multi" onclick="selectMulti('q24',this,'Ter mais de um veículo ou gente trabalhando comigo')">
+          <div class="option-marker checkbox"></div><span class="option-text">Ter mais de um veículo ou gente trabalhando comigo</span>
+        </div>
+        <div class="option multi" onclick="selectMulti('q24',this,'Não depender de aplicativo')">
+          <div class="option-marker checkbox"></div><span class="option-text">Não depender de aplicativo</span>
+        </div>
+        <div class="option multi" onclick="selectMulti('q24',this,'Ter clientes fixos')">
+          <div class="option-marker checkbox"></div><span class="option-text">Ter clientes fixos</span>
+        </div>
+        <div class="option multi" onclick="selectMulti('q24',this,'Ter uma reserva, sem aperto')">
+          <div class="option-marker checkbox"></div><span class="option-text">Ter uma reserva, sem aperto</span>
+        </div>
+        <div class="option multi" onclick="selectMulti('q24',this,'Sair dessa atividade')">
+          <div class="option-marker checkbox"></div><span class="option-text">Sair dessa atividade</span>
+        </div>
+        <div class="option multi" onclick="selectMulti('q24',this,'Outro')">
+          <div class="option-marker checkbox"></div><span class="option-text">Outro</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Q25 -->
+    <div class="question">
+      <div class="question-number">Pergunta 25</div>
+      <div class="question-text">Você sente que está evoluindo nesse trabalho?</div>
+      <div class="options" id="q25">
+        <div class="option" onclick="selectOption('q25',this,'Sim')">
+          <div class="option-marker"></div><span class="option-text">Sim</span>
+        </div>
+        <div class="option" onclick="selectOption('q25',this,'Não')">
+          <div class="option-marker"></div><span class="option-text">Não</span>
+        </div>
+        <div class="option" onclick="selectOption('q25',this,'Não sei')">
+          <div class="option-marker"></div><span class="option-text">Não sei</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+    <div class="btn-actions">
+      <button class="btn-back" onclick="goBack(5)">← Voltar</button>
+      <button class="btn-next" id="btn-5" onclick="goNext(5,6)" disabled>Continuar →</button>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════ -->
+  <!-- SCREEN 6 — PARTE 6: Fechamento         -->
+  <!-- ═══════════════════════════════════════ -->
+  <div class="screen" id="screen-6">
+    <div class="section-header">
+      <div class="section-label">Parte 6 de 6</div>
+      <div class="section-title">Para fechar</div>
+    </div>
+
+    <!-- Q26 -->
+    <div class="question">
+      <div class="question-number">Pergunta 26</div>
+      <div class="question-text">Uma ferramenta simples, feita para quem trabalha com entregas, que ajudasse a entender quanto realmente sobra depois dos gastos — seria útil para você?</div>
+      <div class="options" id="q26">
+        <div class="option" onclick="selectOption('q26',this,'Ajudaria muito')">
+          <div class="option-marker"></div><span class="option-text">Ajudaria muito</span>
+        </div>
+        <div class="option" onclick="selectOption('q26',this,'Ajudaria um pouco')">
+          <div class="option-marker"></div><span class="option-text">Ajudaria um pouco</span>
+        </div>
+        <div class="option" onclick="selectOption('q26',this,'Não faria diferença pra mim')">
+          <div class="option-marker"></div><span class="option-text">Não faria diferença pra mim</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Q27 — resposta livre opcional -->
+    <div class="question">
+      <div class="question-number">Pergunta 27 <span style="color:var(--text-muted);font-weight:400;font-size:13px">— opcional</span></div>
+      <div class="question-text">Quer deixar algum comentário sobre como é, na prática, cuidar do dinheiro no seu trabalho?</div>
+      <textarea id="q27" placeholder="Opcional — escreva o que quiser..." rows="4" oninput="checkSection(6)"></textarea>
+    </div>
+
+    <!-- Email opcional -->
+    <div class="email-section">
+      <div style="height:1px;background:var(--border);margin-bottom:24px"></div>
+      <div class="email-label">Quer receber um resumo dos resultados?</div>
+      <div class="email-hint">Quando a pesquisa fechar, enviaremos um resumo para quem quiser. Não é obrigatório. Seu e-mail não será vinculado às suas respostas.</div>
+      <input type="email" class="text-input" id="email" placeholder="seu@email.com" oninput="checkSection(6)">
+    </div>
+
+    <div class="divider"></div>
+    <div class="btn-actions">
+      <button class="btn-back" onclick="goBack(6)">← Voltar</button>
+      <button class="btn-next" id="btn-6" onclick="submitSurvey()" disabled>Enviar respostas ✓</button>
+    </div>
+    <div class="required-note">* Apenas a pergunta 26 é obrigatória nesta seção</div>
+  </div>
+
+  <!-- ═══════════════════════════════════════ -->
+  <!-- SCREEN 7 — OBRIGADO                    -->
+  <!-- ═══════════════════════════════════════ -->
+  <div class="screen" id="screen-7">
+    <div class="thankyou">
+      <div class="thankyou-icon">🙏</div>
+      <h2>Muito obrigado!</h2>
+      <p>Sua participação faz diferença. Os resultados desta pesquisa ajudarão a entender melhor a realidade de quem trabalha com entregas no Brasil.</p>
+      <p>Os dados coletados serão usados exclusivamente para fins de pesquisa.</p>
+      <div class="thankyou-box">
+        <strong>📊 O que faremos com as respostas</strong><br><br>
+        Os resultados consolidados serão compartilhados com a Associação e com as comunidades participantes. Nenhuma resposta individual será identificada.
+        <span id="emailConfirm"></span>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /container -->
+
+<script>
+  // ════════════════════════════════════════
+  // STATE
+  // ════════════════════════════════════════
+  const answers = {};
+  const multiAnswers = {};
+  let currentScreen = 0;
+
+  // Required fields per screen
+  const required = {
+    1: ['q1','q2','q3','q5','q6','q7','q8'],   // q4 condicional
+    2: ['q9','q10','q11'],
+    3: ['q12','q13','q14','q15','q16'],          // q12 livre obrigatório
+    4: ['q17','q18','q19','q20','q21'],          // q17 livre obrigatório
+    5: ['q22','q23','q24','q25'],
+    6: ['q26']
+  };
+
+  // ════════════════════════════════════════
+  // NAVIGATION
+  // ════════════════════════════════════════
+  function startSurvey() {
+    document.getElementById('progressWrap').style.display = 'block';
+    showScreen(1);
+  }
+
+  function showScreen(n) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById('screen-' + (n === 0 ? 'intro' : n)).classList.add('active');
+    currentScreen = n;
+    updateProgress(n);
+    checkSection(n);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function goNext(from, to) {
+    if (!validateSection(from)) return;
+    showScreen(to);
+  }
+
+  function goBack(from) {
+    if (from === 1) {
+      document.getElementById('progressWrap').style.display = 'none';
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      document.getElementById('screen-intro').classList.add('active');
+      currentScreen = 0;
+    } else {
+      showScreen(from - 1);
+    }
+  }
+
+  // ════════════════════════════════════════
+  // PROGRESS
+  // ════════════════════════════════════════
+  const partLabels = ['','Parte 1 de 6','Parte 2 de 6','Parte 3 de 6','Parte 4 de 6','Parte 5 de 6','Parte 6 de 6','Concluído'];
+  function updateProgress(n) {
+    if (n === 0) return;
+    const pct = Math.round(((n - 1) / 6) * 100);
+    document.getElementById('progressFill').style.width = pct + '%';
+    document.getElementById('progressText').textContent = partLabels[n] || '';
+    document.getElementById('progressPct').textContent = pct + '%';
+  }
+
+  // ════════════════════════════════════════
+  // SELECTION
+  // ════════════════════════════════════════
+  function selectOption(groupId, el, value) {
+    const container = document.getElementById(groupId);
+    container.querySelectorAll('.option').forEach(o => o.classList.remove('selected'));
+    el.classList.add('selected');
+    answers[groupId] = value;
+
+    // Q3 conditional logic
+    if (groupId === 'q3') {
+      const block = document.getElementById('q4-block');
+      const isSolo = value === 'Sozinho, com a minha própria moto ou van';
+      block.classList.toggle('visible', !isSolo);
+      if (isSolo) {
+        delete answers['q4'];
+        document.getElementById('q4').querySelectorAll('.option')
+          .forEach(o => o.classList.remove('selected'));
+      }
+    }
+    checkSection(currentScreen);
+  }
+
+  function selectMulti(groupId, el, value) {
+    if (!multiAnswers[groupId]) multiAnswers[groupId] = [];
+    el.classList.toggle('selected');
+    if (el.classList.contains('selected')) {
+      if (!multiAnswers[groupId].includes(value)) multiAnswers[groupId].push(value);
+    } else {
+      multiAnswers[groupId] = multiAnswers[groupId].filter(v => v !== value);
+    }
+    answers[groupId] = multiAnswers[groupId];
+    checkSection(currentScreen);
+  }
+
+  // ════════════════════════════════════════
+  // VALIDATION
+  // ════════════════════════════════════════
+  function isQ4Required() {
+    return answers['q3'] && answers['q3'] !== 'Sozinho, com a minha própria moto ou van';
+  }
+
+  function isFieldFilled(field) {
+    if (field === 'q4') return !isQ4Required() || !!answers['q4'];
+    if (field === 'q12') return document.getElementById('q12').value.trim().length > 0;
+    if (field === 'q17') return document.getElementById('q17').value.trim().length > 0;
+    if (field === 'q24') return multiAnswers['q24'] && multiAnswers['q24'].length > 0;
+    return !!answers[field];
+  }
+
+  function validateSection(n) {
+    let reqs = required[n] || [];
+    if (n === 1) reqs = [...reqs, ...(isQ4Required() ? ['q4'] : [])];
+    return reqs.every(f => isFieldFilled(f));
+  }
+
+  function checkSection(n) {
+    const btnId = 'btn-' + n;
+    const btn = document.getElementById(btnId);
+    if (!btn) return;
+    btn.disabled = !validateSection(n);
+  }
+
+  // ════════════════════════════════════════
+  // SUBMIT
+  // ════════════════════════════════════════
+  async function submitSurvey() {
+    if (!validateSection(6)) return;
+
+    // Desabilitar botão durante envio
+    const btn = document.getElementById('btn-6');
+    btn.disabled = true;
+    btn.textContent = 'Enviando…';
+
+    const payload = {
+      timestamp: new Date().toISOString(),
+      respostas: { ...answers },
+      q12: document.getElementById('q12').value.trim(),
+      q17: document.getElementById('q17').value.trim(),
+      q27: document.getElementById('q27').value.trim(),
+      email: document.getElementById('email').value.trim()
+    };
+
+    // Backup local
+    try {
+      const saved = JSON.parse(localStorage.getItem('pesquisa_respostas') || '[]');
+      saved.push(payload);
+      localStorage.setItem('pesquisa_respostas', JSON.stringify(saved));
+    } catch(e) {}
+
+    // POST para API Vercel
+    try {
+      await fetch('/api/pesquisa', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+    } catch(e) {
+      // Falha silenciosa — backup já está no localStorage
+      console.warn('API indisponível, resposta salva localmente.', e);
+    }
+
+    // Tela de agradecimento
+    const emailVal = payload.email;
+    const emailConfirm = document.getElementById('emailConfirm');
+    if (emailVal) {
+      emailConfirm.innerHTML = '<br><br>✉️ Enviamos um e-mail para <strong>' + emailVal + '</strong> com mais detalhes.';
+    }
+
+    document.getElementById('progressFill').style.width = '100%';
+    document.getElementById('progressText').textContent = 'Concluído';
+    document.getElementById('progressPct').textContent = '100%';
+    showScreen(7);
+  }
+</script>
+</body>
+</html>
