@@ -131,6 +131,7 @@ export default async function handler(req, res) {
       await resend.emails.send({
         from: 'SmalLog · AgAiTec <onboarding@resend.dev>',
         to: email,
+        replyTo: 'contato@agaitecnology.com',
         subject: 'Obrigado por participar — e um convite especial 🙌',
         html: emailHtml(payload)
       });
